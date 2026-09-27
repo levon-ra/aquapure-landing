@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaPure - Артезианская вода премиум-класса</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f7ff; color: #1a2b3c; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
+        /* Шапка */
+        header { background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .header-inner { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; }
+        .logo { font-size: 24px; font-weight: bold; color: #0077b6; }
+        nav a { margin-left: 20px; text-decoration: none; color: #333; font-weight: 500; }
+        nav a:hover { color: #0077b6; }
+        .cart-icon { position: relative; cursor: pointer; font-size: 24px; }
+        .cart-count { position: absolute; top: -8px; right: -12px; background: #f77f00; color: #fff; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+        
+        /* Главный экран */
+        .hero { text-align: center; padding: 100px 20px; background: linear-gradient(rgba(0,119,182,0.8), rgba(0,119,182,0.8)), url('https://images.unsplash.com/photo-1548839140-29a749e1cf4d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-position: center; color: #fff; }
+        .hero h1 { font-size: 48px; margin-bottom: 15px; }
+        .hero p { font-size: 20px; margin-bottom: 30px; }
+        .btn { display: inline-block; background: #00b4d8; color: #fff; padding: 14px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; transition: 0.3s; }
+        .btn:hover { background: #0096c7; transform: translateY(-2px); }
+        .btn-cart { background: #f77f00; padding: 10px 20px; font-size: 14px; }
+        .btn-cart:hover { background: #e06b00; }
+        
+        /* Секции */
+        section { padding: 60px 0; }
+        h2 { text-align: center; font-size: 32px; margin-bottom: 40px; color: #0077b6; }
+        
+        /* Преимущества */
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .feature { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
+        .feature h3 { color: #0077b6; margin-bottom: 15px; font-size: 20px; }
+        
+        /* Каталог */
+        .catalog-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; justify-content: center; }
+        .catalog-controls input, .catalog-controls select { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .catalog-controls input { flex: 1; min-width: 200px; }
+        .category-btn { padding: 10px 20px; border: 1px solid #0077b6; background: #fff; color: #0077b6; border-radius: 20px; cursor: pointer; transition: 0.3s; }
+        .category-btn.active { background: #0077b6; color: #fff; }
+        .catalog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
+        .product-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .product-card img { width: 100%; height: 200px; object-fit: cover; }
+        .product-info { padding: 20px; text-align: center; }
+        .product-info h3 { font-size: 18px; margin-bottom: 10px; }
+        .product-info .price { font-size: 20px; color: #f77f00; font-weight: bold; margin-bottom: 15px; }
+        
+        /* Корзина */
+        .cart-panel { position: fixed; right: -400px; top: 0; width: 400px; height: 100vh; background: #fff; box-shadow: -5px 0 20px rgba(0,0,0,0.1); transition: 0.3s; z-index: 200; padding: 20px; overflow-y: auto; }
+        .cart-panel.open { right: 0; }
+        .cart-panel h2 { text-align: left; margin-bottom: 20px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .cart-item-info { flex: 1; }
+        .cart-item-info h4 { font-size: 16px; margin-bottom: 5px; }
+        .cart-item-info p { color: #f77f00; font-weight: bold; }
+        .cart-item-actions { display: flex; align-items: center; gap: 10px; }
+        .cart-item-actions button { width: 30px; height: 30px; border: 1px solid #ddd; background: #fff; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        .cart-item-actions button:hover { background: #f0f0f0; }
+        .cart-total { margin-top: 20px; text-align: right; font-size: 20px; font-weight: bold; }
+        .cart-close { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; }
+        
+        /* Модальное окно */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 300; }
+        .modal { background: #fff; padding: 40px; border-radius: 12px; max-width: 450px; width: 90%; position: relative; }
+        .modal h2 { text-align: center; margin-bottom: 20px; }
+        .modal input, .modal textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .modal textarea { height: 80px; resize: vertical; }
+        .modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; }
+        
+        /* Слайдер отзывов */
+        .reviews-slider { display: flex; overflow-x: auto; gap: 20px; padding: 20px 0; scroll-snap-type: x mandatory; }
+        .review-card { min-width: 300px; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); scroll-snap-align: start; }
+        .review-card .stars { color: #f77f00; margin-bottom: 10px; }
+        .review-card p { font-style: italic; margin-bottom: 15px; color: #555; }
+        .review-card .author { font-weight: bold; color: #0077b6; }
+        
+        /* Футер */
+        footer { background: #03045e; color: #fff; text-align: center; padding: 30px; margin-top: 40px; }
+        
+        /* Бургер-меню */
+        .burger { display: none; font-size: 28px; background: none; border: none; cursor: pointer; }
+        @media (max-width: 768px) {
+            .burger { display: block; }
+            nav { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: #fff; flex-direction: column; padding: 20px; box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
+            nav.open { display: flex; }
+            nav a { margin: 10px 0; }
+            .hero h1 { font-size: 32px; }
+            .cart-panel { width: 100%; right: -100%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useReducer, useContext, createContext, useMemo } = React;
+
+        // Данные товаров
+        const PRODUCTS = [
+            { id: 1, name: 'Бутыль 5 л', price: 250, category: 'Бутыли', image: 'https://images.unsplash.com/photo-1616118132534-381148898bb4?w=400' },
+            { id: 2, name: 'Бутыль 19 л', price: 550, category: 'Бутыли', image: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400' },
+            { id: 3, name: 'Набор 4x5 л', price: 900, category: 'Наборы', image: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400' },
+            { id: 4, name: 'Помпа для бутыли', price: 450, category: 'Аксессуары', image: 'https://images.unsplash.com/photo-1585155770447-2f66e2a397b5?w=400' },
+            { id: 5, name: 'Стакан многоразовый', price: 350, category: 'Аксессуары', image: 'https://images.unsplash.com/photo-1570831739435-6601aa3fa4fb?w=400' },
+            { id: 6, name: 'Набор 2x19 л', price: 1000, category: 'Наборы', image: 'https://images.unsplash.com/photo-1560023907-5f339617ea30?w=400' },
+        ];
+
+        const CATEGORIES = ['Все', 'Бутыли', 'Наборы', 'Аксессуары'];
+
+        // Контекст корзины
+        const CartContext = createContext();
+
+        function cartReducer(state, action) {
+            switch (action.type) {
+                case 'ADD':
+                    const existing = state.find(item => item.id === action.payload.id);
+                    if (existing) {
+                        return state.map(item => item.id === action.payload.id ? { ...item, qty: item.qty + 1 } : item);
+                    }
+                    return [...state, { ...action.payload, qty: 1 }];
+                case 'REMOVE':
+                    return state.filter(item => item.id !== action.payload);
+                case 'INCREASE':
+                    return state.map(item => item.id === action.payload ? { ...item, qty: item.qty + 1 } : item);
+                case 'DECREASE':
+                    return state.map(item => item.id === action.payload ? { ...item, qty: Math.max(1, item.qty - 1) } : item);
+                case 'CLEAR':
+                    return [];
+                default:
+                    return state;
+            }
+        }
+
+        function App() {
+            const [cart, dispatch] = useReducer(cartReducer, [], () => {
+                const saved = localStorage.getItem('aquapure-cart');
+                return saved ? JSON.parse(saved) : [];
+            });
+
+            const [cartOpen, setCartOpen] = useState(false);
+            const [modalOpen, setModalOpen] = useState(false);
+            const [modalSuccess, setModalSuccess] = useState(false);
+            const [menuOpen, setMenuOpen] = useState(false);
+            const [search, setSearch] = useState('');
+            const [category, setCategory] = useState('Все');
+            const [sort, setSort] = useState('default');
+            const [formData, setFormData] = useState({ name: '', phone: '', message: '' });
+            const [viewed, setViewed] = useState([]);
+
+            // Сохранение корзины
+            useEffect(() => {
+                localStorage.setItem('aquapure-cart', JSON.stringify(cart));
+            }, [cart]);
+
+            // Сохранение формы
+            useEffect(() => {
+                const saved = localStorage.getItem('aquapure-form');
+                if (saved) setFormData(JSON.parse(saved));
+            }, []);
+
+            useEffect(() => {
+                localStorage.setItem('aquapure-form', JSON.stringify(formData));
+            }, [formData]);
+
+            const filteredProducts = useMemo(() => {
+                let result = PRODUCTS;
+                if (category !== 'Все') result = result.filter(p => p.category === category);
+                if (search) result = result.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+                if (sort === 'price-asc') result = [...result].sort((a, b) => a.price - b.price);
+                if (sort === 'price-desc') result = [...result].sort((a, b) => b.price - a.price);
+                if (sort === 'name') result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+                return result;
+            }, [search, category, sort]);
+
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+            const handleView = (product) => {
+                setViewed(prev => {
+                    const filtered = prev.filter(p => p.id !== product.id);
+                    return [product, ...filtered].slice(0, 4);
+                });
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!formData.name || !formData.phone) return;
+                setModalSuccess(true);
+                setTimeout(() => {
+                    setModalOpen(false);
+                    setModalSuccess(false);
+                    setFormData({ name: '', phone: '', message: '' });
+                    localStorage.removeItem('aquapure-form');
+                }, 2000);
+            };
+
+            return (
+                <CartContext.Provider value={{ cart, dispatch }}>
+                    <header>
+                        <div className="container header-inner">
+                            <div className="logo">💧 AquaPure</div>
+                            <button className="burger" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+                            <nav className={menuOpen ? 'open' : ''}>
+                                <a href="#home" onClick={() => setMenuOpen(false)}>Главная</a>
+                                <a href="#catalog" onClick={() => setMenuOpen(false)}>Каталог</a>
+                                <a href="#reviews" onClick={() => setMenuOpen(false)}>Отзывы</a>
+                                <a href="#contacts" onClick={() => setMenuOpen(false)}>Контакты</a>
+                            </nav>
+                            <div className="cart-icon" onClick={() => setCartOpen(true)}>
+                                🛒 {totalItems > 0 && <span className="cart-count">{totalItems}</span>}
+                            </div>
+                        </div>
+                    </header>
+
+                    <section className="hero" id="home">
+                        <div className="container">
+                            <h1>Чистота на глубине 230 метров</h1>
+                            <p>Доставка природной артезианской воды премиум-класса</p>
+                            <a href="#catalog" className="btn">Выбрать воду</a>
+                        </div>
+                    </section>
+
+                    <section className="container">
+                        <h2>Почему выбирают нас</h2>
+                        <div className="features">
+                            <div className="feature"><h3>💧 Глубина 230 м</h3><p>Вода из защищённого водоносного слоя.</p></div>
+                            <div className="feature"><h3>🛡️ 5 ступеней очистки</h3><p>Фильтрация и УФ-обеззараживание.</p></div>
+                            <div className="feature"><h3>🚚 Доставка за 24 часа</h3><p>По Москве и области.</p></div>
+                        </div>
+                    </section>
+
+                    <section className="container" id="catalog">
+                        <h2>Наша продукция</h2>
+                        <div className="catalog-controls">
+                            <input type="text" placeholder="Поиск по названию..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                            {CATEGORIES.map(cat => (
+                                <button key={cat} className={`category-btn ${category === cat ? 'active' : ''}`} onClick={() => setCategory(cat)}>{cat}</button>
+                            ))}
+                            <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                                <option value="default">По умолчанию</option>
+                                <option value="price-asc">Цена: по возрастанию</option>
+                                <option value="price-desc">Цена: по убыванию</option>
+                                <option value="name">Название: А-Я</option>
+                            </select>
+                        </div>
+                        <div className="catalog-grid">
+                            {filteredProducts.map(product => (
+                                <div className="product-card" key={product.id} onClick={() => handleView(product)}>
+                                    <img src={product.image} alt={product.name} />
+                                    <div className="product-info">
+                                        <h3>{product.name}</h3>
+                                        <p className="price">{product.price} ₽</p>
+                                        <button className="btn btn-cart" onClick={(e) => { e.stopPropagation(); dispatch({ type: 'ADD', payload: product }); }}>В корзину</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {viewed.length > 0 && (
+                        <section className="container">
+                            <h2>Недавно просмотренные</h2>
+                            <div className="catalog-grid">
+                                {viewed.map(product => (
+                                    <div className="product-card" key={product.id}>
+                                        <img src={product.image} alt={product.name} />
+                                        <div className="product-info">
+                                            <h3>{product.name}</h3>
+                                            <p className="price">{product.price} ₽</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    <section className="container" id="reviews">
+                        <h2>Отзывы наших клиентов</h2>
+                        <div className="reviews-slider">
+                            {[1,2,3,4].map(i => (
+                                <div className="review-card" key={i}>
+                                    <div className="stars">★★★★★</div>
+                                    <p>«Отличная вода! Заказываем в офис уже полгода, все довольны. Доставка всегда вовремя.»</p>
+                                    <div className="author">Клиент {i}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="container" id="contacts">
+                        <h2>Свяжитесь с нами</h2>
+                        <div style={{textAlign: 'center'}}>
+                            <p>Телефон: +7 (999) 123-45-67</p>
+                            <p>Email: info@aquapure.ru</p>
+                            <button className="btn" style={{marginTop: '20px'}} onClick={() => setModalOpen(true)}>Заказать звонок</button>
+                        </div>
+                    </section>
+
+                    <footer>
+                        <p>© 2026 AquaPure. Все права защищены.</p>
+                    </footer>
+
+                    {/* Корзина */}
+                    <div className={`cart-panel ${cartOpen ? 'open' : ''}`}>
+                        <button className="cart-close" onClick={() => setCartOpen(false)}>✕</button>
+                        <h2>Корзина</h2>
+                        {cart.length === 0 ? <p>Корзина пуста</p> : (
+                            <>
+                                {cart.map(item => (
+                                    <div className="cart-item" key={item.id}>
+                                        <div className="cart-item-info">
+                                            <h4>{item.name}</h4>
+                                            <p>{item.price * item.qty} ₽</p>
+                                        </div>
+                                        <div className="cart-item-actions">
+                                            <button onClick={() => dispatch({ type: 'DECREASE', payload: item.id })}>-</button>
+                                            <span>{item.qty}</span>
+                                            <button onClick={() => dispatch({ type: 'INCREASE', payload: item.id })}>+</button>
+                                            <button onClick={() => dispatch({ type: 'REMOVE', payload: item.id })}>✕</button>
+                                        </div>
+                                    </div>
+                                ))}
+                                <div className="cart-total">Итого: {totalPrice} ₽</div>
+                                <button className="btn" style={{width: '100%', marginTop: '20px'}} onClick={() => { dispatch({ type: 'CLEAR' }); alert('Заказ оформлен!'); }}>Оформить заказ</button>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Модальное окно */}
+                    {modalOpen && (
+                        <div className="modal-overlay" onClick={() => setModalOpen(false)}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <button className="modal-close" onClick={() => setModalOpen(false)}>✕</button>
+                                {modalSuccess ? (
+                                    <div style={{textAlign: 'center'}}>
+                                        <div style={{fontSize: '60px', color: 'green'}}>✓</div>
+                                        <h2>Спасибо!</h2>
+                                        <p>Мы перезвоним вам в ближайшее время.</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <h2>Заказать звонок</h2>
+                                        <form onSubmit={handleSubmit}>
+                                            <input type="text" placeholder="Ваше имя" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
+                                            <input type="tel" placeholder="Ваш телефон" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} required />
+                                            <textarea placeholder="Комментарий (необязательно)" value={formData.message} onChange={(e) => setFormData({...formData, message: e.target.value})}></textarea>
+                                            <button type="submit" className="btn" style={{width: '100%'}}>Отправить</button>
+                                        </form>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </CartContext.Provider>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
